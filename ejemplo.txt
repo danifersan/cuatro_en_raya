@@ -2,3 +2,5 @@ Una frase de ejemplo para aprender GIT
 Otra frase para hacer otro ejemplo.
 
 Aqui haciendo más pruebas.
+
+Otro ejemplo en el mismo fichero.
