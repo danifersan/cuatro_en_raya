@@ -1,0 +1,2 @@
+Funcion expandir en el minimax
+Evaluar si tienes dos o mas veces y cuanta veces dos cositas juntas
