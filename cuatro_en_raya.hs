@@ -1,5 +1,3 @@
-import Data.Char
-
 menu::IO()
 menu = do 
             putStrLn "1:Multijugador"
