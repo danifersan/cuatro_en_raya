@@ -1,4 +1,3 @@
-import Data.Char
 --Funciones principales:
 
 -- esta_llena_matriz :: [[Int]] -> Bool Devuelve si esta lleno el tablero; osea si se puede seguir jugando
