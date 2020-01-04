@@ -1,3 +1,10 @@
+{-- 
+INSTRUCCIONES DEL JUEGO
+
+Para empezar a jugar tienes que escribir menu en la terminal.
+--} 
+
+
 --Funciones principales:
 
 -- esta_llena_matriz :: [[Int]] -> Bool Devuelve si esta lleno el tablero; osea si se puede seguir jugando
@@ -26,81 +33,101 @@ type Vector = [Int]
 -- PRINCIPIO DEL JUEGO
 menu::IO()
 menu = do 
-            putStrLn "¿Que modo quieres jugar?"
-            putStrLn "1:Multijugador"
-            putStrLn "2:Un jugador"
-            putStrLn "3:Final"
-            opcion <- getLine
-            case read(opcion)::Int of
-                1 -> do 
-                        comienza_multijugador
-                        menu
-                2 -> do 
-                        comienza_unJugador
-                        menu
-                3 -> do 
-                        putStr "Hasta luego."
-
+			putStrLn "¿Que modo quieres jugar?"
+			putStrLn "1:Multijugador"
+			putStrLn "2:Un jugador"
+			putStrLn "3:Final"
+			opcion <- getLine
+			case read(opcion)::Int of
+				1 -> do 
+						comienza_multijugador
+						putStr "Escribe menu para jugar otra vez"
+				2 -> do 
+						comienza_unJugador
+						putStr "Escribe menu para jugar otra vez"
+				3 -> do 
+						putStr "Hasta luego."
+						
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 -- FASE MULTIJUGADOR
 comienza_multijugador :: IO ()
 comienza_multijugador = do 
-                            putStr "¿Cuantas filas quieres jugar?"
-                            dimensionF <- getLine
-                            putStr "¿Y columnas?"
-                            dimensionC <- getLine
-                            let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
-                            print imprimirTablero
-                            multijugador imprimirTablero 
+							putStr "¿Cuantas filas quieres jugar?"
+							dimensionF <- getLine
+							putStr "¿Y columnas?"
+							dimensionC <- getLine
+							let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
+							mapM_ print imprimirTablero
+							multijugador imprimirTablero 
 
 multijugador :: [[Int]] -> IO() 
 multijugador tablero = do
-                            putStrLn "¿Que jugador eres?"
-                            player <- getLine
-                            putStrLn "¿En que columna quieres poner?"
-                            column <- getLine
-                            let continuar = continua tablero (read(column)::Int) (read(player)::Int) 
-                            print continuar
-                            multijugador continuar
-
+							putStrLn "Jugador 1"
+							putStrLn "¿En que columna quieres poner?"
+							column <- getLine
+							let continuar_Multijugador1 = encuentraVacio tablero (read(column)::Int) 1 
+							mapM_ print continuar_Multijugador1
+							if victoria continuar_Multijugador1 
+								then putStrLn "Has ganado jugador 1 :D"
+								else if esta_llena_matriz continuar_Multijugador1
+										 then putStrLn "Tablas"
+										 else do
+												putStrLn "Jugador 2"
+												putStrLn "¿En que columna quieres poner?"
+												column <- getLine
+												let continuar_Multijugador2 = encuentraVacio continuar_Multijugador1 (read(column)::Int) 2 
+												mapM_ print continuar_Multijugador2
+												if victoria continuar_Multijugador2 
+													then putStrLn "Has ganado jugador 2 :D"
+													else if esta_llena_matriz continuar_Multijugador2
+															then putStrLn "Tablas"
+															else multijugador continuar_Multijugador2
+							
+							
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 -- FASE UNJUGADOR
 comienza_unJugador :: IO ()
 comienza_unJugador = do 
-                        putStr "¿Cuantas filas quieres jugar?"
-                        dimensionF <- getLine
-                        putStr "¿Y columnas?"
-                        dimensionC <- getLine
-                        putStrLn "¿Que nivel de dificultad quieres?"
-                        putStrLn "1-Facil"
-                        putStrLn "2-Medio"
-                        putStrLn "3-Dificil"
-                        nivel <- getLine
-                        putStrLn "Recuerda que tu eres el jugador 1 y la maquina el 2"
-                        let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
-                        print imprimirTablero
-                        unJugador imprimirTablero (read(nivel)::Int)
+						putStr "¿Cuantas filas quieres jugar?"
+						dimensionF <- getLine
+						putStr "¿Y columnas?"
+						dimensionC <- getLine
+						putStrLn "¿Que nivel de dificultad quieres?"
+						putStrLn "1-Facil"
+						putStrLn "2-Medio"
+						putStrLn "3-Dificil"
+						nivel <- getLine
+						putStrLn "Recuerda que tu eres el jugador 1 y la maquina el 2"
+						let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
+						mapM_ print imprimirTablero
+						unJugador imprimirTablero (read(nivel)::Int)
 
 unJugador :: [[Int]] -> Int -> IO() 
 unJugador tablero nivel = do
-                            putStrLn "¿En que columna quieres poner?"
-                            column <- getLine
-                            let continuar_unJugador = continua tablero (read(column)::Int) 1 
-                            let Just maquina = (minimaxMain nivel expandir evaluar continuar_unJugador) 
-                            print maquina
-                            unJugador maquina nivel
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------
--- Aquí queda ver la función que no de error nunca la funcion (encuentraVacio tablero column player). Va a devolver un tablero en cualquier caso.
-continua :: [[Int]] -> Int -> Int ->  [[Int]]
-continua tablero column player 
-	| (victoria (tablero1)) || (esta_llena_matriz tablero1) = tablero1
-	| otherwise = tablero1
-	    where tablero1 = encuentraVacio tablero column player
-
-
-
-
+							putStrLn "¿En que columna quieres poner?"
+							column <- getLine
+							let continuar_unJugador = encuentraVacio tablero (read(column)::Int) 1 
+							let Just maquina = (minimaxMain nivel expandir evaluar continuar_unJugador) 
+							if victoria continuar_unJugador
+								then do 
+										putStrLn "Has ganado :D"
+										mapM_ print continuar_unJugador
+								else if esta_llena_matriz continuar_unJugador
+										 then do 
+												putStrLn "Tablas"
+												mapM_ print continuar_unJugador
+										else if victoria maquina 
+												 then do 
+														putStrLn "Has perdido"
+														mapM_ print maquina
+												 else if esta_llena_matriz maquina
+														 then do 
+																putStrLn "Tablas"
+																mapM_ print maquina
+														 else do 
+																mapM_ print maquina
+																unJugador maquina nivel
+							
 -- CREAR TABLERO
 crearTablero :: Int -> Int -> [[Int]]
 crearTablero filas columnas = take filas (repeat (take columnas (repeat 0)))
