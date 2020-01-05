@@ -1,7 +1,16 @@
+--Daniel Fernández Santiago
+--Abraham Israel Benhamú
+--Conecta cuatro
+
 {-- 
 INSTRUCCIONES DEL JUEGO
 
 Para empezar a jugar tienes que escribir menu en la terminal.
+
+El conecta 4 se juega en una rejilla vertical de n filas y m columnas. 
+Las columnas estan numeradas de izquierda a derecha de 1 a m.
+El objetivo es alinear 4 fichas del mismo numero,
+horizontalmente, verticalmente o en diagonal.
 --} 
 
 
@@ -26,108 +35,122 @@ Para empezar a jugar tienes que escribir menu en la terminal.
 --                  Tablero Elemento Columna
 
 
-
 type Matriz = [[Int]]
 type Vector = [Int]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 -- PRINCIPIO DEL JUEGO
 menu::IO()
 menu = do 
-			putStrLn "¿Que modo quieres jugar?"
-			putStrLn "1:Multijugador"
-			putStrLn "2:Un jugador"
-			putStrLn "3:Final"
-			opcion <- getLine
-			case read(opcion)::Int of
-				1 -> do 
-						comienza_multijugador
-						putStr "Escribe menu para jugar otra vez"
-				2 -> do 
-						comienza_unJugador
-						putStr "Escribe menu para jugar otra vez"
-				3 -> do 
-						putStr "Hasta luego."
-						
+            putStrLn "¿Que modo quieres jugar?"
+            putStrLn "1:Multijugador"
+            putStrLn "2:Un jugador"
+            putStrLn "3:Final"
+            opcion <- getLine
+            case read(opcion)::Int of
+                1 -> do 
+                        comienza_multijugador
+                        putStr "Escribe menu para jugar otra vez"
+                2 -> do 
+                        comienza_unJugador
+                        putStr "Escribe menu para jugar otra vez"
+                3 -> do 
+                        putStr "Hasta luego."
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 -- FASE MULTIJUGADOR
 comienza_multijugador :: IO ()
 comienza_multijugador = do 
-							putStr "¿Cuantas filas quieres jugar?"
-							dimensionF <- getLine
-							putStr "¿Y columnas?"
-							dimensionC <- getLine
-							let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
-							mapM_ print imprimirTablero
-							multijugador imprimirTablero 
+                            putStr "¿Cuantas filas quieres jugar?"
+                            dimensionF <- getLine
+                            putStr "¿Y columnas?"
+                            dimensionC <- getLine
+                            let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
+                            mapM_ print imprimirTablero
+                            putStrLn " "
+                            print [1..read(dimensionC)]
+                            multijugador (read(dimensionC)::Int) imprimirTablero 
 
-multijugador :: [[Int]] -> IO() 
-multijugador tablero = do
-							putStrLn "Jugador 1"
-							putStrLn "¿En que columna quieres poner?"
-							column <- getLine
-							let continuar_Multijugador1 = encuentraVacio tablero (read(column)::Int) 1 
-							mapM_ print continuar_Multijugador1
-							if victoria continuar_Multijugador1 
-								then putStrLn "Has ganado jugador 1 :D"
-								else if esta_llena_matriz continuar_Multijugador1
-										 then putStrLn "Tablas"
-										 else do
-												putStrLn "Jugador 2"
-												putStrLn "¿En que columna quieres poner?"
-												column <- getLine
-												let continuar_Multijugador2 = encuentraVacio continuar_Multijugador1 (read(column)::Int) 2 
-												mapM_ print continuar_Multijugador2
-												if victoria continuar_Multijugador2 
-													then putStrLn "Has ganado jugador 2 :D"
-													else if esta_llena_matriz continuar_Multijugador2
-															then putStrLn "Tablas"
-															else multijugador continuar_Multijugador2
-							
-							
+multijugador :: Int -> [[Int]] -> IO() 
+multijugador c tablero = do
+                            putStrLn "Jugador 1"
+                            putStrLn "¿En que columna quieres poner?"
+                            column <- getLine
+                            let continuar_Multijugador1 = encuentraVacio tablero (read(column)::Int) 1 
+                            mapM_ print continuar_Multijugador1
+                            putStrLn " "
+                            print [1..c]
+                            if victoria continuar_Multijugador1 
+                                then putStrLn "Has ganado jugador 1 :D"
+                                else if esta_llena_matriz continuar_Multijugador1
+                                        then putStrLn "Tablas"
+                                         else do
+                                                putStrLn "Jugador 2"
+                                                putStrLn "¿En que columna quieres poner?"
+                                                column <- getLine
+                                                let continuar_Multijugador2 = encuentraVacio continuar_Multijugador1 (read(column)::Int) 2 
+                                                mapM_ print continuar_Multijugador2
+                                                putStrLn " "
+                                                print [1..c]
+                                                if victoria continuar_Multijugador2 
+                                                    then putStrLn "Has ganado jugador 2 :D"
+                                                    else if esta_llena_matriz continuar_Multijugador2
+                                                            then putStrLn "Tablas"
+                                                            else multijugador c continuar_Multijugador2
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 -- FASE UNJUGADOR
 comienza_unJugador :: IO ()
 comienza_unJugador = do 
-						putStr "¿Cuantas filas quieres jugar?"
-						dimensionF <- getLine
-						putStr "¿Y columnas?"
-						dimensionC <- getLine
-						putStrLn "¿Que nivel de dificultad quieres?"
-						putStrLn "1-Facil"
-						putStrLn "2-Medio"
-						putStrLn "3-Dificil"
-						nivel <- getLine
-						putStrLn "Recuerda que tu eres el jugador 1 y la maquina el 2"
-						let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
-						mapM_ print imprimirTablero
-						unJugador imprimirTablero (read(nivel)::Int)
+                        putStr "¿Cuantas filas quieres jugar?"
+                        dimensionF <- getLine
+                        putStr "¿Y columnas?"
+                        dimensionC <- getLine
+                        putStrLn "¿Que nivel de dificultad quieres?"
+                        putStrLn "1-Facil"
+                        putStrLn "2-Medio"
+                        putStrLn "3-Dificil"
+                        nivel <- getLine
+                        putStrLn "Recuerda que tu eres el jugador 1 y la maquina el 2"
+                        let imprimirTablero = crearTablero (read(dimensionF)::Int) (read(dimensionC)::Int)
+                        mapM_ print imprimirTablero
+                        putStrLn " "
+                        print [1..read(dimensionC)]
+                        unJugador imprimirTablero (read(nivel)::Int) (read(dimensionC)::Int)
 
-unJugador :: [[Int]] -> Int -> IO() 
-unJugador tablero nivel = do
-							putStrLn "¿En que columna quieres poner?"
-							column <- getLine
-							let continuar_unJugador = encuentraVacio tablero (read(column)::Int) 1 
-							let Just maquina = (minimaxMain nivel expandir evaluar continuar_unJugador) 
-							if victoria continuar_unJugador
-								then do 
-										putStrLn "Has ganado :D"
-										mapM_ print continuar_unJugador
-								else if esta_llena_matriz continuar_unJugador
-										 then do 
-												putStrLn "Tablas"
-												mapM_ print continuar_unJugador
-										else if victoria maquina 
-												 then do 
-														putStrLn "Has perdido"
-														mapM_ print maquina
-												 else if esta_llena_matriz maquina
-														 then do 
-																putStrLn "Tablas"
-																mapM_ print maquina
-														 else do 
-																mapM_ print maquina
-																unJugador maquina nivel
-							
+unJugador :: [[Int]] -> Int -> Int-> IO() 
+unJugador tablero nivel c = do
+                              putStrLn "¿En que columna quieres poner?"
+                              column <- getLine
+                              let continuar_unJugador = encuentraVacio tablero (read(column)::Int) 1 
+                              let Just maquina = (minimaxMain nivel expandir evaluar continuar_unJugador) 
+                              if victoria continuar_unJugador
+                                  then do 
+                                          putStrLn "Has ganado :D"
+                                          mapM_ print continuar_unJugador
+                                          putStrLn " "
+                                          print [1..c]
+                                  else if esta_llena_matriz continuar_unJugador
+                                           then do 
+                                                  putStrLn "Tablas"
+                                                  mapM_ print continuar_unJugador
+                                                  putStrLn " "
+                                                  print [1..c]
+                                          else if victoria maquina 
+                                                   then do 
+                                                          putStrLn "Has perdido"
+                                                          mapM_ print maquina
+                                                          putStrLn " "
+                                                          print[1..c]
+                                                   else if esta_llena_matriz maquina
+                                                           then do 
+                                                                  putStrLn "Tablas"
+                                                                  mapM_ print maquina
+                                                                  putStrLn " "
+                                                                  print[1..c]
+                                                           else do 
+                                                                  mapM_ print maquina
+                                                                  putStrLn " "
+                                                                  print[1..c]
+                                                                  unJugador maquina nivel c
 -- CREAR TABLERO
 crearTablero :: Int -> Int -> [[Int]]
 crearTablero filas columnas = take filas (repeat (take columnas (repeat 0)))
@@ -282,6 +305,9 @@ se_puede_meter matriz columna elemento = head matriz!!(columna-1) == 0
 diagonales_secundarias :: Matriz -> [[Int]]
 diagonales_secundarias matriz = diagonales_principales (map reverse matriz)
 
+-- Las funciones EVALUAR... podrian haber tomado un segundo parametro que indicara hacia que jugador
+--se le va a evaluar positivamente, pero finalmente se decidio hacer asi por simplicidad
+--aunque no se adapte a la la forma mas dulce del azucar sintactico
 evaluar :: [[Int]] -> Int
 evaluar matriz = (evaluar2 matriz) - (evaluar1 matriz)
 
@@ -349,6 +375,8 @@ numero_tres_2_seguidos_en_fila :: [Int] -> Int
 numero_tres_2_seguidos_en_fila (w:x:y:z:zs)
     |w == x && x == y && y == 2 && z == 0 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
     |w == 0 && x == y && y == z && z == 2 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
+    |w == 2 && x == 0 && y == 2 && z == 2 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
+    |w == 2 && x == 2 && y == 0 && z == 2 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
     |otherwise = (numero_tres_2_seguidos_en_fila (x:y:z:zs))
 numero_tres_2_seguidos_en_fila _ = 0
 
@@ -449,6 +477,8 @@ numero_tres_1_seguidos_en_fila :: [Int] -> Int
 numero_tres_1_seguidos_en_fila (w:x:y:z:zs)
     |w == x && x == y && y == 1 && z == 0 = 1 + (numero_tres_1_seguidos_en_fila (x:y:z:zs))
     |w == 0 && x == y && y == z && z == 1 = 1 + (numero_tres_1_seguidos_en_fila (x:y:z:zs))
+    |w == 1 && x == 0 && y == 1 && z == 1 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
+    |w == 1 && x == 1 && y == 0 && z == 1 = 1 + (numero_tres_2_seguidos_en_fila (x:y:z:zs))
     |otherwise = (numero_tres_1_seguidos_en_fila (x:y:z:zs))
 numero_tres_1_seguidos_en_fila _ = 0
 
